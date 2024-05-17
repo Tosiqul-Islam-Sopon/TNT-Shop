@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const ProductCard = ({ product }) => {
     const { id, title, price, discountPercentage, rating, brand, thumbnail } = product;
     return (
-        <div className="max-w-sm overflow-hidden shadow-lg transition duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-xl rounded-xl"> 
+        <div className=" overflow-hidden shadow-lg transition duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-xl rounded-xl"> 
             <img className="w-full h-[200px]" src={thumbnail} alt={title} />
             <div className="px-6 py-4">
                 <div className="font-bold text-xl mb-2">{title}</div>

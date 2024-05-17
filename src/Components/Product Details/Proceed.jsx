@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { getStoredCart } from "../../../LocalStorage";
+import { AuthContext } from "../Providers/AuthProvider";
 
 const Proceed = () => {
     const product = useLoaderData();
     const [quantity, setQuantity] = useState(1);
     const [discountRate, setDiscountRate] = useState(0);
     const [eligibility, setEligibility] = useState(false);
+    const { user } = useContext(AuthContext);
 
     const checkDiscountEligibility = () => {
         const purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
@@ -17,7 +19,7 @@ const Proceed = () => {
 
     useEffect(() => {
         setEligibility(checkDiscountEligibility());
-        if (eligibility)    setDiscountRate(30);
+        if (eligibility) setDiscountRate(30);
     }, [eligibility]);
 
     const handleQuantityChange = (e) => {
@@ -31,7 +33,12 @@ const Proceed = () => {
 
     const handleBuyNow = () => {
 
-        if (!eligibility){
+        if (!user) {
+            alert(`Please login first to buy any product`);
+            return;
+        }
+
+        if (!eligibility) {
             let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
 
             const newPurchase = {
@@ -41,12 +48,12 @@ const Proceed = () => {
                 quantity: quantity,
                 total: grandTotal
             };
-    
+
             purchaseHistory.push(newPurchase);
             localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
         }
 
-        else{
+        else {
             localStorage.removeItem('purchaseHistory');
         }
 
@@ -90,12 +97,12 @@ const Proceed = () => {
                         <p className="text-red-500">You get special 30% off for your current purchase</p>
                     </div>
                 </>
-                :
-                <>
-                    <div className="text-center mb-5">
-                        <p className="text-green-600">You will get special 30% off for your next purchase if you buy $5000 or more for two consecutive time</p>
-                    </div>
-                </>
+                    :
+                    <>
+                        <div className="text-center mb-5">
+                            <p className="text-green-600">You will get special 30% off for your next purchase if you buy $5000 or more for two consecutive time</p>
+                        </div>
+                    </>
             }
             <div className="border rounded-lg p-8">
                 <h2 className="text-3xl font-semibold mb-4">{product.title}</h2>

@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getStoredCart } from "../../../LocalStorage";
+import { AuthContext } from "../Providers/AuthProvider";
 
 const Cart = () => {
     const [cart, setCart] = useState(getStoredCart());
+    const { user } = useContext(AuthContext);
     const totalPrice = cart.reduce((acc, item) => acc + (item.price * 1), 0).toFixed(2);
 
     const [eligibility, setEligibility] = useState(false);
@@ -27,24 +29,29 @@ const Cart = () => {
 
     const handleBuyNow = () => {
 
-        if (!eligibility){
+        if (!user) {
+            alert(`Please login first to buy any product`);
+            return;
+        }
+
+        if (!eligibility) {
             let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
 
             const newPurchase = {
                 items: cart,
                 total: totalPrice
             };
-    
+
             purchaseHistory.push(newPurchase);
             localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
         }
 
-        else{
+        else {
             localStorage.removeItem('purchaseHistory');
         }
 
         alert(`Purchase successful! Total: $${totalPrice}`);
-        localStorage.removeItem("cart"); 
+        localStorage.removeItem("cart");
         window.location.reload();
     };
 
@@ -56,12 +63,12 @@ const Cart = () => {
                         <p className="text-red-500">You get special 30% off for your current purchase</p>
                     </div>
                 </>
-                :
-                <>
-                    <div className="text-center mb-5">
-                        <p className="text-green-600">You will get special 30% off for your next purchase if you buy $5000 or more for two consecutive time</p>
-                    </div>
-                </>
+                    :
+                    <>
+                        <div className="text-center mb-5">
+                            <p className="text-green-600">You will get special 30% off for your next purchase if you buy $5000 or more for two consecutive time</p>
+                        </div>
+                    </>
             }
             <h2 className="text-3xl font-semibold mb-4">Your Cart</h2>
             {cart.length === 0 ? (
