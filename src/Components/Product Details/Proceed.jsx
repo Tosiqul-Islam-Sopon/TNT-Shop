@@ -53,9 +53,6 @@ const Proceed = () => {
             localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
         }
 
-        else {
-            localStorage.removeItem('purchaseHistory');
-        }
 
         alert(`Purchase successful! Total: $${grandTotal}`);
         window.location.reload();

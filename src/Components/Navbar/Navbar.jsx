@@ -21,7 +21,7 @@ const Navbar = () => {
     const links = <>
         <li><NavLink to="/">Home</NavLink></li>
         <li><NavLink to={"/cart"} >Cart <span className='text-[#FF0000]'>({cartCount})</span></NavLink></li>
-        <li><NavLink to={"/history"} >History</NavLink></li>
+        <li><NavLink to={"/purchaseHistory"} >History</NavLink></li>
     </>;
     const handleLogOut = () => {
         logOut()

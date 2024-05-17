@@ -46,9 +46,6 @@ const Cart = () => {
             localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
         }
 
-        else {
-            localStorage.removeItem('purchaseHistory');
-        }
 
         alert(`Purchase successful! Total: $${totalPrice}`);
         localStorage.removeItem("cart");

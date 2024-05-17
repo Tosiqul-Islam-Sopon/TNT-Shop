@@ -15,6 +15,7 @@ import Registration from './Components/Authentication/Registration.jsx';
 import ProductDetails from './Components/Product Details/ProductDetails.jsx';
 import Proceed from './Components/Product Details/Proceed.jsx';
 import Cart from './Components/Cart/Cart.jsx';
+import PurchaseHistory from './Components/Purchase History/PurchaseHistory.jsx';
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "/cart",
         element: <Cart></Cart>
+      },
+      {
+        path: "/purchaseHistory",
+        element: <PurchaseHistory></PurchaseHistory>
       }
     ],
   },
