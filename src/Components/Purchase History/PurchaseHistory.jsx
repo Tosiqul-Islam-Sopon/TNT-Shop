@@ -1,12 +1,16 @@
-import { useState, useEffect } from "react";
+import axios from "axios";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../Providers/AuthProvider";
 
 const PurchaseHistory = () => {
     const [purchaseHistory, setPurchaseHistory] = useState([]);
+    const { user } = useContext(AuthContext);
 
     useEffect(() => {
-        const storedHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
-        setPurchaseHistory(storedHistory);
-    }, []);
+        axios.get(`http://localhost:5000/purchases/${user?.email}`)
+            .then(res => setPurchaseHistory(res.data))
+            .catch(error => console.log(error))
+    }, [user]);
 
     return (
         <div className="max-w-4xl mx-auto mt-8">
@@ -28,17 +32,17 @@ const PurchaseHistory = () => {
                                         purchase.items ? <>
                                             {
                                                 purchase.items?.map(item => (
-                                                    <li key={item.id}>
+                                                    <li key={item.productId}>
                                                         {item.title} - Quantity: {item.quantity} - ${item.price} each
                                                     </li>
                                                 ))
                                             }
                                         </>
-                                        :
-                                        <>
-                                            <li>{purchase.title} - {purchase.quantity}</li>
-                                        </>
-                                        
+                                            :
+                                            <>
+                                                <li>{purchase.title} - {purchase.quantity}</li>
+                                            </>
+
                                     }
                                 </ul>
                             </div>

@@ -1,38 +1,35 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import { Link, useLoaderData } from "react-router-dom";
+import { AuthContext } from "../Providers/AuthProvider";
+import useOffer from "../Hooks/useOffer";
 
 const ProductDetails = () => {
     const product = useLoaderData();
-    const { id, title, description, price, discountPercentage, rating, brand, thumbnail, images, stock } = product;
+    const [isAdmin, setAdmin] = useState(false);
 
-    const [eligibility, setEligibility] = useState(false);
+    const { _id, title, description, price, discountPercentage, rating, brand, thumbnail, images, stock, specialDiscount } = product;
 
-    const checkDiscountEligibility = () => {
-        const purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
-        const recentPurchases = purchaseHistory.slice(-2);
+    const { type = null, freeProductThreshold = null, discountThreshold = null, discountAmount = null } = specialDiscount || {};
 
-        return recentPurchases.length === 2 && recentPurchases.every(purchase => purchase.total >= 5000);
-    };
+    const { user } = useContext(AuthContext);
+    const globalOfferPercent = useOffer();
 
     useEffect(() => {
-        setEligibility(checkDiscountEligibility());
-    }, []);
+        setAdmin(user && user?.email === "tnt.shop@gmail.com" ? true : false);
+    }, [user]);
+
+    
     return (
         <div className="max-w-4xl mx-auto mt-8">
             {
-                eligibility ? <>
+                globalOfferPercent>0 && <>
                     <div className="text-center mb-5">
                         <p className="text-red-500">You get special 30% off for your current purchase</p>
                     </div>
                 </>
-                    :
-                    <>
-                        <div className="text-center mb-5">
-                            <p className="text-green-600">You will get special 30% off for your next purchase if you buy $5000 or more for two consecutive time</p>
-                        </div>
-                    </>
             }
+
             <div className="flex">
                 <div className="w-1/2">
                     <img className="w-full" src={thumbnail} alt={title} />
@@ -40,6 +37,24 @@ const ProductDetails = () => {
                 <div className="w-1/2 pl-8">
                     <h2 className="text-3xl font-semibold mb-4">{title}</h2>
                     <p className="text-gray-700 mb-4">{description}</p>
+
+
+                    {
+                        (specialDiscount && type === "freeProduct") && (
+                            <div className="border-t-2 py-3">
+                                <p className="text-gray-700 "><span className="font-bold">Special Discount: </span> <span className="text-red-500">Buy {freeProductThreshold} and get 1 free</span></p>
+                            </div>
+                        )
+                    }
+                    {
+                        (specialDiscount && type === "percentageDiscount") && <>
+                            <div className="border-t-2 py-3">
+                                <p className="text-gray-700 "><span className="font-bold">Special Discount: </span> <span className="text-red-500">Buy {discountThreshold} and get {discountAmount}% off</span></p>
+                            </div>
+                        </>
+                    }
+                    
+
                     <div className="flex justify-between items-center border-y-2 py-3">
                         <div>
                             <span className="text-gray-700 font-bold text-xl">${price}</span>
@@ -62,9 +77,20 @@ const ProductDetails = () => {
                         </div>
                     </div>
                     <div className="mt-4">
-                        <Link to={`/proceed/${id}`}><button className="bg-green-500 flex items-center gap-2 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ">
-                            Proceed <span><FaArrowAltCircleRight></FaArrowAltCircleRight></span>
-                        </button></Link>
+                        {
+                            isAdmin ? <>
+                                <Link to={`/updateProduct/${_id}`}><button className="bg-green-500 flex items-center gap-2 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ">
+                                    Update
+                                </button></Link>
+                            </>
+                                :
+                                <>
+                                    <Link to={`/proceed/${_id}`}><button className="bg-green-500 flex items-center gap-2 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ">
+                                        Proceed <span><FaArrowAltCircleRight></FaArrowAltCircleRight></span>
+                                    </button></Link>
+                                </>
+                        }
+
                     </div>
                 </div>
             </div>

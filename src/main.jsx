@@ -16,6 +16,8 @@ import ProductDetails from './Components/Product Details/ProductDetails.jsx';
 import Proceed from './Components/Product Details/Proceed.jsx';
 import Cart from './Components/Cart/Cart.jsx';
 import PurchaseHistory from './Components/Purchase History/PurchaseHistory.jsx';
+import UpdateProduct from './Components/Admin/UpdateProduct.jsx';
+import Offers from './Components/Admin/Offers.jsx';
 
 const router = createBrowserRouter([
   {
@@ -26,7 +28,7 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home></Home>,
-        loader: () => fetch('https://dummyjson.com/products?limit=100&skip=0')
+        loader: () => fetch('http://localhost:5000/products')
       },
       {
         path: "/login",
@@ -39,12 +41,12 @@ const router = createBrowserRouter([
       {
         path: "/product/:id",
         element: <ProductDetails></ProductDetails>,
-        loader: ({params}) => fetch(`https://dummyjson.com/products/${params.id}`)
+        loader: ({params}) => fetch(`http://localhost:5000/product/${params.id}`)
       },
       {
         path: "/proceed/:id",
         element: <Proceed></Proceed>,
-        loader: ({params}) => fetch(`https://dummyjson.com/products/${params.id}`)
+        loader: ({params}) => fetch(`http://localhost:5000/product/${params.id}`)
       },
       {
         path: "/cart",
@@ -53,7 +55,16 @@ const router = createBrowserRouter([
       {
         path: "/purchaseHistory",
         element: <PurchaseHistory></PurchaseHistory>
-      }
+      },
+      {
+        path: "/updateProduct/:id",
+        element: <UpdateProduct></UpdateProduct>,
+        loader: ({params}) => fetch(`http://localhost:5000/product/${params.id}`)
+      },
+      {
+        path: "/offers",
+        element: <Offers></Offers>
+      },
     ],
   },
 ]);

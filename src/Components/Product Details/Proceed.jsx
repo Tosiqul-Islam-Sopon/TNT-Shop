@@ -1,26 +1,21 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { getStoredCart } from "../../../LocalStorage";
 import { AuthContext } from "../Providers/AuthProvider";
+import axios from "axios";
+import useOffer from "../Hooks/useOffer";
 
 const Proceed = () => {
     const product = useLoaderData();
     const [quantity, setQuantity] = useState(1);
-    const [discountRate, setDiscountRate] = useState(0);
-    const [eligibility, setEligibility] = useState(false);
     const { user } = useContext(AuthContext);
 
-    const checkDiscountEligibility = () => {
-        const purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
-        const recentPurchases = purchaseHistory.slice(-2);
+    const globalOfferPercent = useOffer();
 
-        return recentPurchases.length === 2 && recentPurchases.every(purchase => purchase.total >= 5000);
-    };
+    const { title, price, discountPercentage, stock, specialDiscount } = product;
 
-    useEffect(() => {
-        setEligibility(checkDiscountEligibility());
-        if (eligibility) setDiscountRate(30);
-    }, [eligibility]);
+    const { type = null, freeProductThreshold = null, discountThreshold = null, discountAmount = null } = specialDiscount || {};
+    // console.log(specialDiscount);
 
     const handleQuantityChange = (e) => {
         setQuantity(parseInt(e.target.value));
@@ -28,8 +23,19 @@ const Proceed = () => {
 
     const totalPrice = (product.price * quantity).toFixed(2);
     const discount = ((product.price * quantity) * (product.discountPercentage / 100)).toFixed(2);
-    const specialDiscount = ((product.price * quantity) * (discountRate / 100)).toFixed(2);
-    const grandTotal = (totalPrice - discount - specialDiscount).toFixed(2);
+    let discountPrice = 0;
+    if (discountThreshold && quantity >= discountThreshold) {
+        discountPrice = (price * quantity * (discountAmount / 100)).toFixed(2);
+    }
+    else if (freeProductThreshold && quantity >= freeProductThreshold) {
+        discountPrice = price.toFixed(2);
+        // console.log("get product free...", discountPrice);
+    }
+    if (globalOfferPercent > 0) {
+        discountPrice = (parseFloat(discountPrice) + (price * quantity * (globalOfferPercent / 100))).toFixed(2);
+    }
+    // const specialDiscount = ((product.price * quantity) * (discountRate / 100)).toFixed(2);
+    const grandTotal = (totalPrice - discount - discountPrice).toFixed(2);
 
     const handleBuyNow = () => {
 
@@ -38,20 +44,27 @@ const Proceed = () => {
             return;
         }
 
-        if (!eligibility) {
-            let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+        // if (!eligibility) {
+        let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
 
-            const newPurchase = {
-                id: product.id,
-                title: product.title,
-                price: product.price,
-                quantity: quantity,
-                total: grandTotal
-            };
+        const newPurchase = {
+            productId: product._id,
+            title: product.title,
+            price: product.price,
+            quantity: quantity,
+            total: grandTotal,
+            userEmail: user.email
+        };
 
-            purchaseHistory.push(newPurchase);
-            localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
-        }
+        console.log(newPurchase);
+
+        axios.post("http://localhost:5000/addPurchase", newPurchase)
+            .then(res => console.log(res.data))
+            .catch(error => console.log(error))
+
+        purchaseHistory.push(newPurchase);
+        localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
+        // }
 
 
         alert(`Purchase successful! Total: $${grandTotal}`);
@@ -60,7 +73,7 @@ const Proceed = () => {
 
     const handleAddToCart = () => {
         const item = {
-            id: product.id,
+            productId: product._id,
             title: product.title,
             price: grandTotal,
             quantity: quantity
@@ -69,7 +82,7 @@ const Proceed = () => {
         let cart = getStoredCart();
 
         // Check if the product is already in the cart
-        const existingItemIndex = cart.findIndex(cartItem => cartItem.id === item.id);
+        const existingItemIndex = cart.findIndex(cartItem => cartItem.productId === item.productId);
 
         if (existingItemIndex !== -1) {
             // If the product is already in the cart, remove it
@@ -84,32 +97,40 @@ const Proceed = () => {
         window.location.reload();
     };
 
-
-
     return (
         <div className="max-w-4xl mx-auto mt-8">
             {
-                eligibility ? <>
+                globalOfferPercent > 0 && <>
                     <div className="text-center mb-5">
-                        <p className="text-red-500">You get special 30% off for your current purchase</p>
+                        <p className="text-red-500">You get special {globalOfferPercent}% off for your current purchase</p>
                     </div>
                 </>
-                    :
-                    <>
-                        <div className="text-center mb-5">
-                            <p className="text-green-600">You will get special 30% off for your next purchase if you buy $5000 or more for two consecutive time</p>
-                        </div>
-                    </>
             }
             <div className="border rounded-lg p-8">
-                <h2 className="text-3xl font-semibold mb-4">{product.title}</h2>
+                <h2 className="text-3xl font-semibold mb-4">{title}</h2>
                 <div className="flex justify-between">
                     <div className="flex items-center mb-4">
-                        <span className="text-gray-700 font-bold text-xl">${product.price}</span>
-                        <span className="text-sm text-gray-600">({product.discountPercentage}% off)</span>
+                        <span className="text-gray-700 font-bold text-xl">${price}</span>
+                        <span className="text-sm text-gray-600">({discountPercentage}% off)</span>
                     </div>
                     <div>
-                        <span className="text-gray-700 text-xl"><span className="font-bold">Stock:</span> {product.stock}</span>
+                        {
+                            (specialDiscount && type === "freeProduct") && (
+                                <div className="">
+                                    <p className="text-gray-700 "><span className="text-red-500">Buy {freeProductThreshold} and get 1 free</span></p>
+                                </div>
+                            )
+                        }
+                        {
+                            (specialDiscount && type === "percentageDiscount") && <>
+                                <div className="">
+                                    <p className="text-gray-700 "><span className="text-red-500">Buy {discountThreshold} and get {discountAmount}% off</span></p>
+                                </div>
+                            </>
+                        }
+                    </div>
+                    <div>
+                        <span className="text-gray-700 text-xl"><span className="font-bold">Stock:</span> {stock}</span>
                     </div>
                 </div>
                 <div className="mb-4">
@@ -125,10 +146,10 @@ const Proceed = () => {
                     <span className="ml-2">${discount}</span>
                 </div>
                 {
-                    eligibility && <>
+                    discountPrice > 0 && <>
                         <div className="mb-4">
                             <label className="text-gray-700 font-bold">Special Discount:</label>
-                            <span className="ml-2">${specialDiscount}</span>
+                            <span className="ml-2">${discountPrice}</span>
                         </div>
                     </>
                 }

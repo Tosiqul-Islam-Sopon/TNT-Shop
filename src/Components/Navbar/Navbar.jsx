@@ -1,7 +1,7 @@
 
 import { useContext, useEffect, useState } from 'react';
 import { FaCartPlus } from 'react-icons/fa';
-import {  Link, NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { AuthContext } from '../Providers/AuthProvider';
 import Swal from 'sweetalert2';
 import { getStoredCart } from '../../../LocalStorage';
@@ -19,9 +19,18 @@ const Navbar = () => {
     }, [cart]);
 
     const links = <>
-        <li><NavLink to="/">Home</NavLink></li>
-        <li><NavLink to={"/cart"} >Cart <span className='text-[#FF0000]'>({cartCount})</span></NavLink></li>
-        <li><NavLink to={"/purchaseHistory"} >History</NavLink></li>
+        {user && user.email === "tnt.shop@gmail.com" ?
+            <>
+                <li><NavLink to="/">Products</NavLink></li>
+                <li><NavLink to="/offers">Offers</NavLink></li>
+            </>
+            :
+            <>
+                <li><NavLink to="/">Home</NavLink></li>
+                <li><NavLink to={"/cart"} >Cart <span className='text-[#FF0000]'>({cartCount})</span></NavLink></li>
+                <li><NavLink to={"/purchaseHistory"} >History</NavLink></li>
+            </>
+        }
     </>;
     const handleLogOut = () => {
         logOut()

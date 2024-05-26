@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-    const { id, title, price, discountPercentage, rating, brand, thumbnail } = product;
+    const { _id, title, price, discountPercentage, rating, brand, thumbnail } = product;
     return (
         <div className=" overflow-hidden shadow-lg transition duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-xl rounded-xl"> 
             <img className="w-full h-[200px]" src={thumbnail} alt={title} />
@@ -18,7 +18,7 @@ const ProductCard = ({ product }) => {
                 </div>
             </div>
             <div className="px-6 py-4">
-                <Link to={`/product/${id}`}><button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
+                <Link to={`/product/${_id}`}><button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
                     View Details
                 </button></Link>
             </div>
@@ -29,5 +29,5 @@ const ProductCard = ({ product }) => {
 export default ProductCard;
 
 ProductCard.propTypes = {
-    product: PropTypes.array
+    product: PropTypes.object
 };

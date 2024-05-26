@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { getStoredCart } from "../../../LocalStorage";
 import { AuthContext } from "../Providers/AuthProvider";
+import axios from "axios";
 
 const Cart = () => {
     const [cart, setCart] = useState(getStoredCart());
@@ -21,7 +22,7 @@ const Cart = () => {
     }, [eligibility]);
 
     const handleRemoveFromCart = (itemId) => {
-        const updatedCart = cart.filter(item => item.id !== itemId);
+        const updatedCart = cart.filter(item => item.productId !== itemId);
         setCart(updatedCart);
         localStorage.setItem("cart", JSON.stringify(updatedCart));
         window.location.reload();
@@ -33,20 +34,17 @@ const Cart = () => {
             alert(`Please login first to buy any product`);
             return;
         }
+        const newPurchase = {
+            items: cart,
+            total: totalPrice,
+            userEmail: user.email
+        };
 
-        if (!eligibility) {
-            let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
+        axios.post("http://localhost:5000/addPurchase", newPurchase)
+            .then(res => console.log(res.data))
+            .catch(error => console.log(error))
 
-            const newPurchase = {
-                items: cart,
-                total: totalPrice
-            };
-
-            purchaseHistory.push(newPurchase);
-            localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
-        }
-
-
+            
         alert(`Purchase successful! Total: $${totalPrice}`);
         localStorage.removeItem("cart");
         window.location.reload();
@@ -72,22 +70,22 @@ const Cart = () => {
                 <p>Your cart is empty</p>
             ) : (
                 <div className="border rounded-lg p-8">
-                    {cart.map(item => (
-                        <div key={item.id} className="mb-4">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="text-lg font-semibold">{item.title}</h3>
-                                <button onClick={() => handleRemoveFromCart(item.id)} className="text-red-500 font-semibold ">Remove</button>
+                    {
+                        cart.map(item => (
+                            <div key={item.productId} className="mb-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                                    <button onClick={() => handleRemoveFromCart(item.productId)} className="text-red-500 font-semibold ">Remove</button>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span>Quantity: {item.quantity}</span>
+                                    <span className="font-semibold">${(item.price * 1).toFixed(2)}</span>
+                                </div>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span>Quantity: {item.quantity}</span>
-                                <span className="font-semibold">${(item.price * 1).toFixed(2)}</span>
-                            </div>
-                        </div>
-                    ))}
+                        ))
+                    }
                     <div className="mt-4">
                         <h3 className="text-lg font-semibold">Total Price: ${totalPrice}</h3>
-                        {/* <h3 className="text-lg font-semibold">Delivery Charge: $5.00</h3> */}
-                        {/* <h3 className="text-lg font-semibold">Grand Total: ${totalPrice + 5}</h3> */}
 
                         <div className="mt-4">
                             <button onClick={handleBuyNow} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
