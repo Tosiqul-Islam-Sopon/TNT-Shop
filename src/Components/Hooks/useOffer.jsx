@@ -12,7 +12,9 @@ const useOffer = () => {
         const fetchOffers = async () => {
             try {
                 const res = await axios.get("http://localhost:5000/offers");
-                setOffers(res.data);
+                const today = new Date().setHours(0, 0, 0, 0); // Get today's date at midnight
+                const filteredOffers = res.data.filter(offer => new Date(offer.startDate) >= today);
+                setOffers(filteredOffers);
             } catch (error) {
                 console.log(error);
             }

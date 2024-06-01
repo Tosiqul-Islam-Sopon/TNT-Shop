@@ -7,14 +7,15 @@ const UpdateProduct = () => {
     const product = useLoaderData();
     const navigate = useNavigate();
 
-    
-
     const { title, description, price, discountPercentage, brand, thumbnail, images, stock, specialDiscount } = product;
 
     const [specialDiscountType, setSpecialDiscountType] = useState(specialDiscount?.type || '');
     const [freeProductThreshold, setFreeProductThreshold] = useState(specialDiscount?.freeProductThreshold || '');
     const [discountThreshold, setDiscountThreshold] = useState(specialDiscount?.discountThreshold || '');
     const [discountAmount, setDiscountAmount] = useState(specialDiscount?.discountAmount || '');
+    const [startDate, setStartDate] = useState(specialDiscount?.startDate || '');
+    const [endDate, setEndDate] = useState(specialDiscount?.endDate || '');
+    const [freeProductCount, setFreeProductCount] = useState(specialDiscount?.freeProductCount || '');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,12 +35,15 @@ const UpdateProduct = () => {
             freeProductThreshold: specialDiscountType === 'freeProduct' ? parseInt(freeProductThreshold, 10) : null,
             discountThreshold: specialDiscountType === 'percentageDiscount' ? parseInt(discountThreshold, 10) : null,
             discountAmount: specialDiscountType === 'percentageDiscount' ? parseFloat(discountAmount) : null,
+            freeProductCount: specialDiscountType === 'freeProduct' ? parseInt(freeProductCount, 10) : null,
+            startDate,
+            endDate
         };
 
         const updateProduct = {
             title, description, price, discountPercentage, brand, thumbnail, images: [img1, img2], stock, specialDiscount
-        }
-        console.log(updateProduct);
+        };
+        // console.log(updateProduct);
 
         try {
             const response = await axios.patch(`http://localhost:5000/updateProduct/${id}`, updateProduct);
@@ -184,23 +188,38 @@ const UpdateProduct = () => {
                         <option value="percentageDiscount">Percentage Discount</option>
                     </select>
                 </div>
-                
+
                 {specialDiscountType === 'freeProduct' && (
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="freeProductThreshold">
-                            Free Product Threshold
-                        </label>
-                        <input
-                            type="number"
-                            id="freeProductThreshold"
-                            name="freeProductThreshold"
-                            value={freeProductThreshold}
-                            onChange={(e) => setFreeProductThreshold(e.target.value)}
-                            className="w-full px-3 py-2 border rounded"
-                        />
-                    </div>
+                    <>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="freeProductThreshold">
+                                Free Product Threshold
+                            </label>
+                            <input
+                                type="number"
+                                id="freeProductThreshold"
+                                name="freeProductThreshold"
+                                value={freeProductThreshold}
+                                onChange={(e) => setFreeProductThreshold(e.target.value)}
+                                className="w-full px-3 py-2 border rounded"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="freeProductCount">
+                                Number of Free Products
+                            </label>
+                            <input
+                                type="number"
+                                id="freeProductCount"
+                                name="freeProductCount"
+                                value={freeProductCount}
+                                onChange={(e) => setFreeProductCount(e.target.value)}
+                                className="w-full px-3 py-2 border rounded"
+                            />
+                        </div>
+                    </>
                 )}
-                
+
                 {specialDiscountType === 'percentageDiscount' && (
                     <>
                         <div className="mb-4">
@@ -227,6 +246,39 @@ const UpdateProduct = () => {
                                 name="discountAmount"
                                 value={discountAmount}
                                 onChange={(e) => setDiscountAmount(e.target.value)}
+                                className="w-full px-3 py-2 border rounded"
+                            />
+                        </div>
+                    </>
+                )}
+
+                {specialDiscountType !== "" && (
+                    <>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="startDate">
+                                Start Date
+                            </label>
+                            <input
+                                type="date"
+                                id="startDate"
+                                name="startDate"
+                                required
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="w-full px-3 py-2 border rounded"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="endDate">
+                                End Date
+                            </label>
+                            <input
+                                type="date"
+                                id="endDate"
+                                name="endDate"
+                                required
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
                                 className="w-full px-3 py-2 border rounded"
                             />
                         </div>

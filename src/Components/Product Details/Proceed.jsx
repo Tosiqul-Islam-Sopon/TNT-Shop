@@ -12,13 +12,21 @@ const Proceed = () => {
 
     const globalOfferPercent = useOffer();
 
-    const { title, price, discountPercentage, stock, specialDiscount } = product;
+    const { _id, title, description, price, discountPercentage, brand, thumbnail, images, stock, specialDiscount } = product;
 
-    const { type = null, freeProductThreshold = null, discountThreshold = null, discountAmount = null } = specialDiscount || {};
+    const { type = null, freeProductThreshold = null, freeProductCount = null, discountThreshold = null, discountAmount = null } = specialDiscount || {};
     // console.log(specialDiscount);
 
     const handleQuantityChange = (e) => {
-        setQuantity(parseInt(e.target.value));
+        if (parseInt(e.target.value) < 1) {
+            setQuantity(1);
+        }
+        else if (parseInt(e.target.value) > product.stock) {
+            setQuantity(product.stock);
+        }
+        else {
+            setQuantity(parseInt(e.target.value));
+        }
     };
 
     const totalPrice = (product.price * quantity).toFixed(2);
@@ -27,56 +35,78 @@ const Proceed = () => {
     if (discountThreshold && quantity >= discountThreshold) {
         discountPrice = (price * quantity * (discountAmount / 100)).toFixed(2);
     }
-    else if (freeProductThreshold && quantity >= freeProductThreshold) {
-        discountPrice = price.toFixed(2);
-        // console.log("get product free...", discountPrice);
-    }
+    // else if (freeProductThreshold && quantity >= freeProductThreshold) {
+    //     discountPrice = price.toFixed(2);
+    //     // console.log("get product free...", discountPrice);
+    // }
     if (globalOfferPercent > 0) {
         discountPrice = (parseFloat(discountPrice) + (price * quantity * (globalOfferPercent / 100))).toFixed(2);
     }
     // const specialDiscount = ((product.price * quantity) * (discountRate / 100)).toFixed(2);
     const grandTotal = (totalPrice - discount - discountPrice).toFixed(2);
 
-    const handleBuyNow = () => {
 
+    const handleUpdateProduct = async() => {
+        const newStock = stock - (freeProductThreshold && quantity >= freeProductThreshold ? quantity + freeProductCount : quantity);
+        const updateProduct = {
+            title, description, price, discountPercentage, brand, thumbnail, images, stock: newStock, specialDiscount
+        }
+
+        await axios.patch(`http://localhost:5000/updateProduct/${_id}`, updateProduct);
+    }
+
+
+    const handleBuyNow = () => {
         if (!user) {
-            alert(`Please login first to buy any product`);
+            alert("Please login first to buy any product");
             return;
         }
 
-        // if (!eligibility) {
         let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
 
-        const newPurchase = {
+        // if (freeProductThreshold && quantity >= freeProductThreshold){
+        //     const newQuantity = quantity + 1;
+        //     setQuantity(newQuantity);
+        //     console.log(quantity, "qqqqqqqqq");
+        // }
+
+        const item = {
             productId: product._id,
             title: product.title,
-            price: product.price,
-            quantity: quantity,
-            total: grandTotal,
-            userEmail: user.email
+            price: grandTotal,
+            quantity: freeProductThreshold && quantity >= freeProductThreshold ? quantity + freeProductCount : quantity,
+            specialDiscount
         };
 
-        console.log(newPurchase);
+        const newPurchase = {
+            items: [item],
+            total: grandTotal,
+            userEmail: user.email,
+            date: new Date().toISOString()
+        };
 
         axios.post("http://localhost:5000/addPurchase", newPurchase)
-            .then(res => console.log(res.data))
-            .catch(error => console.log(error))
+            .then( async(res) => {
+                if (res.data.insertedId) {
+                    await handleUpdateProduct();
+                    alert(`Purchase successful! Total: $${grandTotal}`);
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.log(error));
 
         purchaseHistory.push(newPurchase);
         localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
-        // }
-
-
-        alert(`Purchase successful! Total: $${grandTotal}`);
-        window.location.reload();
     };
+
 
     const handleAddToCart = () => {
         const item = {
             productId: product._id,
             title: product.title,
             price: grandTotal,
-            quantity: quantity
+            quantity: freeProductThreshold && quantity >= freeProductThreshold ? quantity + freeProductCount : quantity,
+            specialDiscount
         };
 
         let cart = getStoredCart();
@@ -117,7 +147,7 @@ const Proceed = () => {
                         {
                             (specialDiscount && type === "freeProduct") && (
                                 <div className="">
-                                    <p className="text-gray-700 "><span className="text-red-500">Buy {freeProductThreshold} and get 1 free</span></p>
+                                    <p className="text-gray-700 "><span className="text-red-500">Buy {freeProductThreshold} and get {freeProductCount} free</span></p>
                                 </div>
                             )
                         }
@@ -150,6 +180,14 @@ const Proceed = () => {
                         <div className="mb-4">
                             <label className="text-gray-700 font-bold">Special Discount:</label>
                             <span className="ml-2">${discountPrice}</span>
+                        </div>
+                    </>
+                }
+                {
+                    (freeProductThreshold && quantity >= freeProductThreshold) && <>
+                        <div className="mb-4">
+                            <label className="text-gray-700 font-bold">Special Discount:</label>
+                            <span className="ml-2">You get {freeProductCount} product free </span>
                         </div>
                     </>
                 }

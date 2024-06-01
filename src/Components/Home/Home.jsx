@@ -13,7 +13,7 @@ const Home = () => {
             {
                 globalOfferPercent>0 && <>
                     <div className="text-center my-5">
-                        <p className="text-red-500">You get special 30% off for your current purchase</p>
+                        <p className="text-red-500">You get special {globalOfferPercent} off for your current purchase</p>
                     </div>
                 </>
             }

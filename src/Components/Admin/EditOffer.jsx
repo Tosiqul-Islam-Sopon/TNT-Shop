@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
-const Offers = () => {
-    const [offers, setOffers] = useState([]);
+const EditOffer = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
-    const [newOffer, setNewOffer] = useState({
+    const [offer, setOffer] = useState({
         type: "",
         threshold: 0,
         discountAmount: 0,
@@ -15,57 +15,43 @@ const Offers = () => {
     });
 
     useEffect(() => {
-        // Fetch existing offers from the server
-        axios.get("http://localhost:5000/offers")
+        axios.get(`http://localhost:5000/offers/${id}`)
             .then(response => {
-                const today = new Date().setHours(0, 0, 0, 0); // Get today's date at midnight
-                const filteredOffers = response.data.filter(offer => new Date(offer.startDate) >= today);
-                setOffers(filteredOffers);
+                setOffer(response.data);
             })
             .catch(error => {
-                console.error("Error fetching offers:", error);
+                console.error("Error fetching offer:", error);
             });
-    }, []);
+    }, [id]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setNewOffer({
-            ...newOffer,
+        setOffer({
+            ...offer,
             [name]: ['threshold', 'discountAmount', 'minimumConsecutivePurchase'].includes(name) ? parseFloat(value) : value
         });
     };
 
-    const handleAddOffer = (e) => {
+    const handleSaveChanges = (e) => {
         e.preventDefault();
-        axios.post("http://localhost:5000/addOffer", newOffer)
-            .then(response => {
-                setOffers([...offers, response.data]);
-                setNewOffer({ type: "", threshold: 0, discountAmount: 0, minimumConsecutivePurchase: 0, startDate: "", endDate: "" });
-                window.location.reload();
+        axios.put(`http://localhost:5000/offers/${id}`, offer)
+            .then((res) => {
+                // console.log(res.data);
+                if (res.data.modifiedCount){
+                    alert("Offer updated successfully");
+                }
+                navigate("/offers");
             })
             .catch(error => {
-                console.error("Error adding offer:", error);
+                console.error("Error saving changes:", error);
             });
-    };
-
-    const handleDeleteOffer = (id) => {
-        axios.delete(`http://localhost:5000/offers/${id}`)
-            .then(() => {
-                setOffers(offers.filter(offer => offer._id !== id));
-            })
-            .catch(error => {
-                console.error("Error deleting offer:", error);
-            });
-    };
-
-    const handleEditOffer = (id) => {
-        navigate(`/editOffer/${id}`);
+        // console.log(offer);
     };
 
     return (
-        <div className="max-w-4xl mx-auto mt-8">
-            <h1 className="text-3xl font-bold mb-6">Manage Offers</h1>
-            <form onSubmit={handleAddOffer} className="mb-8">
+        <div className="max-w-4xl mx-auto my-8">
+            <h1 className="text-3xl font-bold mb-6">Edit Offer</h1>
+            <form onSubmit={handleSaveChanges}>
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="type">
                         Offer Type
@@ -75,7 +61,7 @@ const Offers = () => {
                         id="type"
                         name="type"
                         required
-                        value={newOffer.type}
+                        value={offer.type}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border rounded"
                     />
@@ -89,7 +75,7 @@ const Offers = () => {
                         id="threshold"
                         name="threshold"
                         required
-                        value={newOffer.threshold}
+                        value={offer.threshold}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border rounded"
                         step="0.01"
@@ -104,7 +90,7 @@ const Offers = () => {
                         id="discountAmount"
                         name="discountAmount"
                         required
-                        value={newOffer.discountAmount}
+                        value={offer.discountAmount}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border rounded"
                         step="0.01"
@@ -119,7 +105,7 @@ const Offers = () => {
                         id="minimumConsecutivePurchase"
                         name="minimumConsecutivePurchase"
                         required
-                        value={newOffer.minimumConsecutivePurchase}
+                        value={offer.minimumConsecutivePurchase}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border rounded"
                     />
@@ -133,7 +119,7 @@ const Offers = () => {
                         id="startDate"
                         name="startDate"
                         required
-                        value={newOffer.startDate}
+                        value={offer.startDate}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border rounded"
                     />
@@ -147,42 +133,17 @@ const Offers = () => {
                         id="endDate"
                         name="endDate"
                         required
-                        value={newOffer.endDate}
+                        value={offer.endDate}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border rounded"
                     />
                 </div>
                 <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                    Add Offer
+                    Save Changes
                 </button>
             </form>
-            <h2 className="text-2xl font-bold mb-4">Current Offers</h2>
-            <ul>
-                {offers.map(offer => (
-                    <li key={offer._id} className="mb-4 p-4 border rounded">
-                        <p><strong>Type:</strong> {offer.type}</p>
-                        <p><strong>Threshold:</strong> ${offer.threshold}</p>
-                        <p><strong>Discount Amount:</strong> {offer.discountAmount}%</p>
-                        <p><strong>Minimum Consecutive Purchase:</strong> {offer.minimumConsecutivePurchase}</p>
-                        <p><strong>Start Date:</strong> {new Date(offer.startDate).toLocaleDateString()}</p>
-                        <p><strong>End Date:</strong> {new Date(offer.endDate).toLocaleDateString()}</p>
-                        <button
-                            onClick={() => handleEditOffer(offer._id)}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 mr-2"
-                        >
-                            Edit
-                        </button>
-                        <button
-                            onClick={() => handleDeleteOffer(offer._id)}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-2"
-                        >
-                            Delete
-                        </button>
-                    </li>
-                ))}
-            </ul>
         </div>
     );
 };
 
-export default Offers;
+export default EditOffer;

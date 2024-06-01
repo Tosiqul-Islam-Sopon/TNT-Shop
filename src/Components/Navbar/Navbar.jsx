@@ -5,11 +5,14 @@ import { Link, NavLink } from 'react-router-dom';
 import { AuthContext } from '../Providers/AuthProvider';
 import Swal from 'sweetalert2';
 import { getStoredCart } from '../../../LocalStorage';
+import { IoNotificationsOutline } from 'react-icons/io5';
+import axios from 'axios';
 
 const Navbar = () => {
     const [cartCount, setCartCount] = useState(0);
     const { user, logOut } = useContext(AuthContext);
     const cart = getStoredCart();
+    const [unseenNotifications, setUnseenNotifications] = useState([]);
 
     useEffect(() => {
         const cartItems = JSON.parse(localStorage.getItem("cart"));
@@ -18,17 +21,25 @@ const Navbar = () => {
         }
     }, [cart]);
 
+    useEffect(() => {
+        
+        axios.get(`http://localhost:5000/unseenNotifications/${user?.email}`)
+            .then(res => setUnseenNotifications(res.data));
+    }, [user])
+
     const links = <>
         {user && user.email === "tnt.shop@gmail.com" ?
             <>
                 <li><NavLink to="/">Products</NavLink></li>
                 <li><NavLink to="/offers">Offers</NavLink></li>
+                <li><NavLink to="/returnRequests">Return Requests</NavLink></li>
             </>
             :
             <>
                 <li><NavLink to="/">Home</NavLink></li>
                 <li><NavLink to={"/cart"} >Cart <span className='text-[#FF0000]'>({cartCount})</span></NavLink></li>
                 <li><NavLink to={"/purchaseHistory"} >History</NavLink></li>
+                <li><NavLink to={"/notifications"} ><p className='flex items-center gap-1 text-lg'><span><IoNotificationsOutline /></span><span className='text-[#FF0000]'>({unseenNotifications.length})</span></p></NavLink></li>
             </>
         }
     </>;

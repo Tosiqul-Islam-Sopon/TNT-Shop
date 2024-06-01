@@ -10,7 +10,7 @@ const ProductDetails = () => {
 
     const { _id, title, description, price, discountPercentage, rating, brand, thumbnail, images, stock, specialDiscount } = product;
 
-    const { type = null, freeProductThreshold = null, discountThreshold = null, discountAmount = null } = specialDiscount || {};
+    const { type = null, freeProductThreshold = null, freeProductCount = null, discountThreshold = null, discountAmount = null, startDate = null, endDate = null } = specialDiscount || {};
 
     const { user } = useContext(AuthContext);
     const globalOfferPercent = useOffer();
@@ -19,13 +19,22 @@ const ProductDetails = () => {
         setAdmin(user && user?.email === "tnt.shop@gmail.com" ? true : false);
     }, [user]);
 
-    
+    const validDate = () => {
+        if (!startDate || !endDate) {
+            return false;
+        }
+        const today = new Date().setHours(0, 0, 0, 0);
+        return (today >= new Date(startDate).setHours(0, 0, 0, 0) && today <= new Date(endDate).setHours(0, 0, 0, 0));
+    };
+
+
+
     return (
         <div className="max-w-4xl mx-auto mt-8">
             {
-                globalOfferPercent>0 && <>
+                globalOfferPercent > 0 && <>
                     <div className="text-center mb-5">
-                        <p className="text-red-500">You get special 30% off for your current purchase</p>
+                        <p className="text-red-500">You get special {globalOfferPercent} off for your current purchase</p>
                     </div>
                 </>
             }
@@ -40,20 +49,20 @@ const ProductDetails = () => {
 
 
                     {
-                        (specialDiscount && type === "freeProduct") && (
+                        (specialDiscount && validDate() && type === "freeProduct") && (
                             <div className="border-t-2 py-3">
-                                <p className="text-gray-700 "><span className="font-bold">Special Discount: </span> <span className="text-red-500">Buy {freeProductThreshold} and get 1 free</span></p>
+                                <p className="text-gray-700 "><span className="font-bold">Special Discount: </span> <span className="text-red-500">Buy {freeProductThreshold} and get {freeProductCount} free</span></p>
                             </div>
                         )
                     }
                     {
-                        (specialDiscount && type === "percentageDiscount") && <>
+                        (specialDiscount && validDate() && type === "percentageDiscount") && <>
                             <div className="border-t-2 py-3">
                                 <p className="text-gray-700 "><span className="font-bold">Special Discount: </span> <span className="text-red-500">Buy {discountThreshold} and get {discountAmount}% off</span></p>
                             </div>
                         </>
                     }
-                    
+
 
                     <div className="flex justify-between items-center border-y-2 py-3">
                         <div>
