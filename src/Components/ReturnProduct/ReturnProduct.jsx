@@ -34,7 +34,7 @@ const ReturnProduct = () => {
         const parsedValue = isNaN(parseInt(value)) ? 0 : parseInt(value);
         setReturnQuantities(prevState => ({
             ...prevState,
-            [productId]: (discount && discount.type === "freeProduct")
+            [productId]: (discount && discount.type === "freeProduct" && quantity >= discount.freeProductThreshold)
                 ? (parsedValue > quantity - discount.freeProductCount ? quantity - discount.freeProductCount : parsedValue)
                 : (parsedValue > quantity ? quantity : parsedValue)
         }));
