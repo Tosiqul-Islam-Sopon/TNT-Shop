@@ -118,8 +118,9 @@ const ReturnRequests = () => {
                 historyItems.push(newItem);
             }
         }
-
-        if (items.length){
+        console.log("item->", historyItems);
+        if (historyItems.length > 0){
+            console.log("Fuck offfffffff");
             const newHistory = {
                 items: historyItems,
                 total: total - totalCashBack,
