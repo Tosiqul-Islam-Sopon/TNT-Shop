@@ -55,16 +55,16 @@ const ReturnRequests = () => {
                 const purchasePrice = (price * purchaseQuantity) -  (purchaseQuantity * price * ((discountPercentage+specialDiscount?.discountAmount)/100));
                 cashBack = purchasePrice - currentPrice;
 
-                console.log("case1->", cashBack);
+                // console.log("case1->", cashBack);
             }
             else {
                 cashBack = (price * quantity) - (quantity * price * ((discountPercentage+specialDiscount?.discountAmount)/100));
-                console.log("case2->", cashBack);
+                // console.log("case2->", cashBack);
             }
         }
         else{
             cashBack = (price * quantity) - (price * quantity * (discountPercentage/100));
-            console.log("case3->", cashBack);
+            // console.log("case3->", cashBack);
         }
 
         return [cashBack, takeBackQuantity];
@@ -118,9 +118,9 @@ const ReturnRequests = () => {
                 historyItems.push(newItem);
             }
         }
-        console.log("item->", historyItems);
+        // console.log("item->", historyItems);
         if (historyItems.length > 0){
-            console.log("Fuck offfffffff");
+            // console.log("Fuck offfffffff");
             const newHistory = {
                 items: historyItems,
                 total: total - totalCashBack,

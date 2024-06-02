@@ -69,12 +69,15 @@ const ReturnProduct = () => {
         }
     };
 
-    const handleDiscountText = (discount) => {
+    const handleDiscountText = (discount, quantity) => {
         if (!discount) return null;
-        if (discount.type === "freeProduct") {
+        if (discount && discount.type === "freeProduct" && quantity >= discount.freeProductThreshold) {
             return `Discount of buy ${discount.freeProductThreshold} get ${discount.freeProductCount} free`;
         }
-        return `Discount of buy ${discount.discountThreshold} get ${discount.discountAmount}% off`;
+        else if (discount && discount.type === "percentageDiscount" && quantity >= discount.discountThreshold) {
+            return `Discount of buy ${discount.discountThreshold} get ${discount.discountAmount}% off`;
+        }
+        return null;
     };
 
     if (loading) return <p>Loading purchase details...</p>;
@@ -90,12 +93,16 @@ const ReturnProduct = () => {
                             <div key={item.productId} className="mb-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <h3 className="text-lg font-semibold">{item.title}</h3>
-                                    {handleDiscountText(item.specialDiscount) && <p className="text-red-500">{handleDiscountText(item.specialDiscount)}</p>}
+                                    {
+                                        handleDiscountText(item.specialDiscount, item.quantity) && <p className="text-red-500">
+                                            {handleDiscountText(item.specialDiscount, item.quantity)}
+                                        </p>
+                                    }
                                     <span className="font-semibold">${item.price}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        {item.specialDiscount && item.specialDiscount.type === "freeProduct" ? (
+                                        {item.specialDiscount && item.specialDiscount.type === "freeProduct" && item.quantity >= item.specialDiscount.freeProductThreshold ? (
                                             <>
                                                 <p className="font-semibold">Purchased Quantity: {item.quantity - item.specialDiscount.freeProductCount}</p>
                                                 <p className="font-semibold">Free Quantity: {item.specialDiscount.freeProductCount}</p>

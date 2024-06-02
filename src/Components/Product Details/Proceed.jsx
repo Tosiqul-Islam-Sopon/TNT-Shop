@@ -35,10 +35,7 @@ const Proceed = () => {
     if (discountThreshold && quantity >= discountThreshold) {
         discountPrice = (price * quantity * (discountAmount / 100)).toFixed(2);
     }
-    // else if (freeProductThreshold && quantity >= freeProductThreshold) {
-    //     discountPrice = price.toFixed(2);
-    //     // console.log("get product free...", discountPrice);
-    // }
+
     if (globalOfferPercent > 0) {
         discountPrice = (parseFloat(discountPrice) + (price * quantity * (globalOfferPercent / 100))).toFixed(2);
     }
@@ -46,7 +43,7 @@ const Proceed = () => {
     const grandTotal = (totalPrice - discount - discountPrice).toFixed(2);
 
 
-    const handleUpdateProduct = async() => {
+    const handleUpdateProduct = async () => {
         const newStock = stock - (freeProductThreshold && quantity >= freeProductThreshold ? quantity + freeProductCount : quantity);
         const updateProduct = {
             title, description, price, discountPercentage, brand, thumbnail, images, stock: newStock, specialDiscount
@@ -64,17 +61,12 @@ const Proceed = () => {
 
         let purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory')) || [];
 
-        // if (freeProductThreshold && quantity >= freeProductThreshold){
-        //     const newQuantity = quantity + 1;
-        //     setQuantity(newQuantity);
-        //     console.log(quantity, "qqqqqqqqq");
-        // }
-
         const item = {
             productId: product._id,
             title: product.title,
             price: grandTotal,
             quantity: freeProductThreshold && quantity >= freeProductThreshold ? quantity + freeProductCount : quantity,
+            // quantity: freeProductThreshold && quantity >= freeProductThreshold ? quantity + (Math.floor(quantity / freeProductThreshold) * freeProductCount) : quantity,
             specialDiscount
         };
 
@@ -86,7 +78,7 @@ const Proceed = () => {
         };
 
         axios.post("http://localhost:5000/addPurchase", newPurchase)
-            .then( async(res) => {
+            .then(async (res) => {
                 if (res.data.insertedId) {
                     await handleUpdateProduct();
                     alert(`Purchase successful! Total: $${grandTotal}`);
@@ -187,7 +179,8 @@ const Proceed = () => {
                     (freeProductThreshold && quantity >= freeProductThreshold) && <>
                         <div className="mb-4">
                             <label className="text-gray-700 font-bold">Special Discount:</label>
-                            <span className="ml-2">You get {freeProductCount} product free </span>
+                            <span className="ml-2">You get { freeProductCount } product free </span>
+                            {/* <span className="ml-2">You get {(Math.floor(quantity / freeProductThreshold) * freeProductCount)} product free </span> */}
                         </div>
                     </>
                 }
