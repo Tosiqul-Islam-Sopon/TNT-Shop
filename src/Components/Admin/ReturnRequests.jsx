@@ -119,10 +119,16 @@ const ReturnRequests = () => {
             }
         }
 
-        const newHistory = {
-            items: historyItems,
-            total: total - totalCashBack,
-            date
+        if (items.length){
+            const newHistory = {
+                items: historyItems,
+                total: total - totalCashBack,
+                date
+            }
+            await axios.patch(`http://localhost:5000/purchase/${purchase_id}`, newHistory);
+        }
+        else{
+            await axios.delete(`http://localhost:5000/deletePurchase/${purchase_id}`);
         }
 
         const notification = {
@@ -133,7 +139,6 @@ const ReturnRequests = () => {
             date: new Date().toISOString()
         }
 
-        await axios.patch(`http://localhost:5000/purchase/${purchase_id}`, newHistory);
         const res = await axios.patch(`http://localhost:5000/approveReturn/${_id}`)
         if (res.data.modifiedCount){
             await axios.post("http://localhost:5000/notification", notification);

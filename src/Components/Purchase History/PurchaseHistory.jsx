@@ -72,7 +72,7 @@ const PurchaseHistory = () => {
                         <div key={index} className="mb-4 border-b pb-4">
                             <h3 className="text-lg font-semibold mb-2">Purchase #{index + 1}</h3>
                             <div className="mb-2">
-                                <span className="font-semibold">Total Price:</span> ${purchase.total}
+                                <span className="font-semibold">Total Price:</span> ${Number(purchase.total).toFixed(2)}
                             </div>
                             <div className="mb-2">
                                 <span className="font-semibold">Purchase Date:</span> {formatDateTime(purchase.date)}
@@ -83,7 +83,7 @@ const PurchaseHistory = () => {
                                     {purchase.items ? (
                                         purchase.items.map(item => (
                                             <li key={item.productId}>
-                                                {item.title} - Quantity: {item.quantity} - ${item.price}
+                                                {item.title} - Quantity: {item.quantity} - ${Number(item.price).toFixed(2)}
                                             </li>
                                         ))
                                     ) : (
