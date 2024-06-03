@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-    const { _id, title, price, discountPercentage, rating, brand, thumbnail } = product;
+    const { _id, title, price, discountPercentage, rating, brand, thumbnail, stock } = product;
     return (
         <div className=" overflow-hidden shadow-lg transition duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-xl rounded-xl"> 
             <img className="w-full h-[200px]" src={thumbnail} alt={title} />
@@ -15,6 +15,10 @@ const ProductCard = ({ product }) => {
                 <div className="flex justify-between items-center mt-2">
                     <span className="text-gray-700">Rating: {rating}</span>
                     <span className="text-gray-700">Brand: {brand}</span>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                    <span className="text-gray-700">Stock: {stock}</span>
+                    {/* <span className="text-gray-700">Brand: {brand}</span> */}
                 </div>
             </div>
             <div className="px-6 py-4">

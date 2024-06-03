@@ -39,7 +39,6 @@ const Proceed = () => {
     if (globalOfferPercent > 0) {
         discountPrice = (parseFloat(discountPrice) + (price * quantity * (globalOfferPercent / 100))).toFixed(2);
     }
-    // const specialDiscount = ((product.price * quantity) * (discountRate / 100)).toFixed(2);
     const grandTotal = (totalPrice - discount - discountPrice).toFixed(2);
 
 
@@ -103,15 +102,12 @@ const Proceed = () => {
 
         let cart = getStoredCart();
 
-        // Check if the product is already in the cart
         const existingItemIndex = cart.findIndex(cartItem => cartItem.productId === item.productId);
 
         if (existingItemIndex !== -1) {
-            // If the product is already in the cart, remove it
             cart.splice(existingItemIndex, 1);
         }
 
-        // Add the new item to the cart
         cart.push(item);
 
         localStorage.setItem("cart", JSON.stringify(cart));

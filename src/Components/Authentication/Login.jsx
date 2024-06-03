@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import img from "../../assets/Images/login.jpg"
 import { FcGoogle } from "react-icons/fc";
 import { AuthContext } from "../Providers/AuthProvider";
@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const { logIn, googleSignIn } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     const handleLogin = e => {
         e.preventDefault();
@@ -25,6 +26,7 @@ const Login = () => {
                     showConfirmButton: false,
                     timer: 1500
                 });
+                navigate("/");
             })
             .catch(error => {
                 Swal.fire({
@@ -47,11 +49,11 @@ const Login = () => {
                     showConfirmButton: false,
                     timer: 1500
                 });
-                
-                // navigate(location?.state ? location.state : "/");
+
+                navigate("/");
             })
             .catch(error => {
-                
+
                 Swal.fire({
                     title: "OPPS!!!",
                     text: `${error.message}`,
