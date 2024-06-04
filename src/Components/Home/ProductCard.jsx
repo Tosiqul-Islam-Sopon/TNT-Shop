@@ -2,10 +2,28 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-    const { _id, title, price, discountPercentage, rating, brand, thumbnail, stock } = product;
+    const { _id, title, price, discountPercentage, rating, brand, thumbnail, stock, specialDiscount } = product;
     return (
-        <div className=" overflow-hidden shadow-lg transition duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-xl rounded-xl"> 
-            <img className="w-full h-[200px]" src={thumbnail} alt={title} />
+        <div className=" overflow-hidden shadow-lg transition duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-xl rounded-xl">
+            <div>
+                <img className="w-full h-[200px] relative" src={thumbnail} alt={title} />
+                <div className='absolute top-24 left-10 bg-gray-100 p-2 rounded'>
+                        {
+                            (specialDiscount && specialDiscount.type === "freeProduct") && (
+                                <div className="">
+                                    <p className="text-gray-700 text-2xl font-bold"><span className="text-red-500">Buy {specialDiscount.freeProductThreshold} and get {specialDiscount.freeProductCount} free</span></p>
+                                </div>
+                            )
+                        }
+                        {
+                            (specialDiscount && specialDiscount.type === "percentageDiscount") && <>
+                                <div className="">
+                                    <p className="text-gray-700 text-2xl font-bold"><span className="text-red-500">Buy {specialDiscount.discountThreshold} and get {specialDiscount.discountAmount}% off</span></p>
+                                </div>
+                            </>
+                        }
+                    </div>
+            </div>
             <div className="px-6 py-4">
                 <div className="font-bold text-xl mb-2">{title}</div>
                 <div className="flex justify-between items-center">
